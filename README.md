@@ -5,13 +5,9 @@ Demo https://codepen.io/AlenToma/pen/owXYKj?editors=0100
 
 properties
 
-// override DayNames	
-
-dayNames: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-
-//override MonthNames
-
- monthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+// Culture
+ 
+ culture: en-US, sv-se, nbno or engb
  
  // on day select
  
