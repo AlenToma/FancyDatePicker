@@ -200,12 +200,11 @@
                     BuildDate(true);
                 });
 
-
                 dayContainer = $('<div class="dayContainer"></div>');
                 container.append(dayContainer);
                 /// Days
                 $(culture.shortestDayNames).each(function () {
-                    var day = $('<div dayName="' + this + '" class="day">' + this.slice(0, 2) + '</div>');
+                    var day = $('<div dayName="' + this + '" class="day">' + this + '</div>');
                     day.width(dayContainer.width() / culture.shortestDayNames.length);
                     dayContainer.append(day);
                 });
@@ -337,12 +336,20 @@
                     if (value.indexOf(char) != -1)
                         valueSplitter = value.split(char);
                     else valueSplitter.push(value)
-                    if (valueSplitter.length == 1 && stringSplitter[0].length == valueSplitter[0].length)
+                    if (valueSplitter.length == 1 && stringSplitter[0].length == valueSplitter[0].length) {
                         value += char
+                        start++;
+                    }
                     else if (valueSplitter.length == 2 && stringSplitter[1].length == valueSplitter[1].length)
-                        value += char;
+                    {
+                        value += char
+                        start++;
+                    }
                     else if (valueSplitter.length == 3 && stringSplitter[2].length == valueSplitter[2].length)
-                        value += char;
+                    {
+                        value += char
+                        start++;
+                    }
                     if (value.length > maskText.length)
                         value = value.substring(0, value.length - 1);
                     result = value;
