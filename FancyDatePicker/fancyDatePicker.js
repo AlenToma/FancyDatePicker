@@ -433,36 +433,6 @@
     }
 
 
-    function engb() {
-
-        var CultureInfo = {
-            name: "en-GB",
-            englishName: "English (United Kingdom)",
-            nativeName: "English (United Kingdom)",
-
-            /* Day Name Strings */
-            dayNames: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-            abbreviatedDayNames: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-            shortestDayNames: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
-            firstLetterDayNames: ["S", "M", "T", "W", "T", "F", "S"],
-
-            /* Month Name Strings */
-            monthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
-            abbreviatedMonthNames: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-
-            /* AM/PM Designators */
-            amDesignator: "AM",
-            pmDesignator: "PM",
-
-            firstDayOfWeek: 1,
-            twoDigitYearMax: 2029,
-        }
-
-        return CultureInfo;
-    }
-
-
-
     function svse() {
 
         var CultureInfo = {
