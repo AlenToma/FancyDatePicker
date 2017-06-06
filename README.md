@@ -1,10 +1,11 @@
-# FancyDatePicker
-FancyDatePicker is a small plugin to Date-picker using only jquary.
+**FancyDatePicker is a small plugin to Date-picker using only jquary.**
 
-Demo https://codepen.io/AlenToma/pen/owXYKj?editors=0100
+#**Demo**
 
-properties
+https://codepen.io/AlenToma/pen/owXYKj?editors=0100
 
+**Properties**
+   
 // Culture
  
  culture: en-US, sv-se, nbno or engb
@@ -28,3 +29,4 @@ properties
  //closeOnSelect
  
  closeOnSelect: true,
+    
