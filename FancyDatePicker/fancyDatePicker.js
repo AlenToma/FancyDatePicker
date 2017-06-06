@@ -123,17 +123,17 @@
             var timeout = undefined;
             var orgBackGound = undefined;
             function BuildDate(staticDate, slow) {
-                if (input.parent().parent().find(".calanderBoxContainer").length > 0) {
+                if (input.parent().find(".calanderBoxContainer").length > 0) {
                     if (orgBackGound == undefined)
-                        orgBackGound = input.parent().parent().find(".calanderBoxContainer").css("background");
+                        orgBackGound = input.parent().find(".calanderBoxContainer").css("background");
                     if (timeout != undefined)
                         clearInterval(timeout);
 
                     timeout = setInterval(function () {
                         if (container != undefined && container.length > 0 && container.is(":visible"))
-                            input.parent().parent().find(".calanderBoxContainer").css({ background: "inherit" });
+                            input.parent().find(".calanderBoxContainer").css({ background: "inherit" });
                         else {
-                            input.parent().parent().find(".calanderBoxContainer").css({ background: orgBackGound });
+                            input.parent().find(".calanderBoxContainer").css({ background: orgBackGound });
                             clearInterval(timeout);
                         }
                     }, 100);
