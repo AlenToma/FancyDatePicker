@@ -35,16 +35,24 @@
     $.fn.fancyDatePicker = function (options) {
         var settings = $.extend({
             selectedDate: undefined,
-            dayNames: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-            monthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
             onDayClick: undefined,
             handler: undefined,
             format: "mm/dd/yy",
             readOnly: false,
             useMask: true,
             closeOnSelect: true,
+            culture: "en-US"
         }, options);
         $(this).each(function () {
+            var cultureName = settings.culture.toLowerCase().replace("-", "");
+            var culture = eval(cultureName);
+            if (culture == undefined || culture === null) {
+                culture = enus;
+            }
+            if (culture)
+                culture = culture();
+
+
             var input = $(this);
             var inputFormat = settings.format;
 
@@ -162,7 +170,7 @@
                     return days;
                 }
 
-                container.remove();
+                $(".fancyDatePicker").remove();
                 container = $('<div class="fancyDatePicker"></div>');
                 $("body").append(container);
 
@@ -171,7 +179,7 @@
                 /// Header
 
                 dayContainer.append("<div class='prev fancyDatePickerIdentifire'></div><div class='selectedMonth fancyDatePickerIdentifire'></div><div class='next fancyDatePickerIdentifire'></div>")
-                dayContainer.find(".selectedMonth").html(settings.monthNames[settings.selectedDate.getMonth()] + " " + settings.selectedDate.getFullYear());
+                dayContainer.find(".selectedMonth").html(culture.monthNames[settings.selectedDate.getMonth()] + " " + settings.selectedDate.getFullYear());
                 dayContainer.find(".prev").click(function () {
                     if (settings.selectedDate.getMonth() - 1 >= 0)
                         settings.selectedDate.setMonth(settings.selectedDate.getMonth() - 1);
@@ -196,9 +204,9 @@
                 dayContainer = $('<div class="dayContainer"></div>');
                 container.append(dayContainer);
                 /// Days
-                $(settings.dayNames).each(function () {
+                $(culture.shortestDayNames).each(function () {
                     var day = $('<div dayName="' + this + '" class="day">' + this.slice(0, 2) + '</div>');
-                    day.width(dayContainer.width() / settings.dayNames.length);
+                    day.width(dayContainer.width() / culture.shortestDayNames.length);
                     dayContainer.append(day);
                 });
 
@@ -217,7 +225,7 @@
                     if (container.find(".dayContainer").last().find(".day").length === 7) {
                         container.append('<div class="dayContainer"></div>');
                     }
-                    day.width(dayContainer.width() / settings.dayNames.length);
+                    day.width(dayContainer.width() / culture.shortestDayNames.length);
                     container.find(".dayContainer").last().append(day);
                 }
 
@@ -250,7 +258,7 @@
 
                 var dayContainer = $('<div class="dayContainer"></div>');
                 var today = new Date();
-                var todayString = settings.dayNames[today.getDay()] + ", " + settings.monthNames[today.getMonth()] + " " + (today.getDate() > 9 ? today.getDate() : "0" + today.getDate()) + ", " + today.getFullYear();
+                var todayString = culture.shortestDayNames[today.getDay()] + ", " + culture.monthNames[today.getMonth()] + " " + (today.getDate() > 9 ? today.getDate() : "0" + today.getDate()) + ", " + today.getFullYear();
                 dayContainer.append("<div class='footer fancyDatePickerIdentifire'><div class='today fancyDatePickerIdentifire'>" + todayString + "</div></div>");
 
                 dayContainer.click(function () {
@@ -287,7 +295,6 @@
                         start--;
                     if (start < 0)
                         start = 0;
-
                     if (value[start] === char)
                         start++;
                     for (var i = start; i <= value.length; i++) {
@@ -312,7 +319,6 @@
                     }
                     keyisDown = true;
                 });
-
 
                 input.unbind("keyup.fancyDatePicker");
                 input.bind("keyup.fancyDatePicker", function (event) {
@@ -367,5 +373,154 @@
             });
         });
     };
+
+    function enus() {
+
+        var CultureInfo = {
+            /* Culture Name */
+            name: "en-US",
+            englishName: "English (United States)",
+            nativeName: "English (United States)",
+
+            /* Day Name Strings */
+            dayNames: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+            abbreviatedDayNames: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+            shortestDayNames: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
+            firstLetterDayNames: ["S", "M", "T", "W", "T", "F", "S"],
+
+            /* Month Name Strings */
+            monthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+            abbreviatedMonthNames: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+
+            /* AM/PM Designators */
+            amDesignator: "AM",
+            pmDesignator: "PM",
+
+            firstDayOfWeek: 0,
+            twoDigitYearMax: 2029
+        }
+
+        return CultureInfo;
+    }
+
+
+    function engb() {
+
+        var CultureInfo = {
+            name: "en-GB",
+            englishName: "English (United Kingdom)",
+            nativeName: "English (United Kingdom)",
+
+            /* Day Name Strings */
+            dayNames: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+            abbreviatedDayNames: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+            shortestDayNames: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
+            firstLetterDayNames: ["S", "M", "T", "W", "T", "F", "S"],
+
+            /* Month Name Strings */
+            monthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+            abbreviatedMonthNames: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+
+            /* AM/PM Designators */
+            amDesignator: "AM",
+            pmDesignator: "PM",
+
+            firstDayOfWeek: 1,
+            twoDigitYearMax: 2029,
+        }
+
+        return CultureInfo;
+    }
+
+
+    function engb() {
+
+        var CultureInfo = {
+            name: "en-GB",
+            englishName: "English (United Kingdom)",
+            nativeName: "English (United Kingdom)",
+
+            /* Day Name Strings */
+            dayNames: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+            abbreviatedDayNames: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+            shortestDayNames: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
+            firstLetterDayNames: ["S", "M", "T", "W", "T", "F", "S"],
+
+            /* Month Name Strings */
+            monthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+            abbreviatedMonthNames: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+
+            /* AM/PM Designators */
+            amDesignator: "AM",
+            pmDesignator: "PM",
+
+            firstDayOfWeek: 1,
+            twoDigitYearMax: 2029,
+        }
+
+        return CultureInfo;
+    }
+
+
+
+    function svse() {
+
+        var CultureInfo = {
+            /* Culture Name */
+            name: "sv-SE",
+            englishName: "Swedish (Sweden)",
+            nativeName: "svenska (Sverige)",
+
+            /* Day Name Strings */
+            dayNames: ["Söndag", "Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag"],
+            abbreviatedDayNames: ["Sö", "Så", "Ti", "On", "To", "Fr", "Lö"],
+            shortestDayNames: ["Sö", "Så", "Ti", "On", "To", "Fr", "Lö"],
+            firstLetterDayNames: ["s", "m", "t", "o", "t", "f", "l"],
+
+            /* Month Name Strings */
+            monthNames: ["Januari", "Februari", "Mars", "April", "Maj", "Juni", "Juli", "Augusti", "September", "Oktober", "November", "December"],
+            abbreviatedMonthNames: ["Jan", "Feb", "Mar", "Apr", "Maj", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dec"],
+
+            /* AM/PM Designators */
+            amDesignator: "",
+            pmDesignator: "",
+
+            firstDayOfWeek: 1,
+            twoDigitYearMax: 2029,
+        }
+
+        return CultureInfo;
+    }
+
+
+
+
+    function nbno() {
+
+        var CultureInfo = {
+            name: "nb-NO",
+            englishName: "Norwegian, Bokmål (Norway)",
+            nativeName: "norsk, bokmål (Norge)",
+
+            /* Day Name Strings */
+            dayNames: ["Søndag", "Mandag", "Tirsdag", "Onsdag", "Torsdag", "Fredag", "Lørdag"],
+            abbreviatedDayNames: ["Sø", "Ma", "Ti", "On", "To", "Fr", "Lø"],
+            shortestDayNames: ["Sø", "Ma", "Ti", "On", "To", "Fr", "Lø"],
+            firstLetterDayNames: ["S", "M", "T", "O", "T", "F", "L"],
+
+            /* Month Name Strings */
+            monthNames: ["Januar", "Februar", "Mars", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Desember"],
+            abbreviatedMonthNames: ["Jan", "Feb", "Mar", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Des"],
+
+            /* AM/PM Designators */
+            amDesignator: "",
+            pmDesignator: "",
+
+            firstDayOfWeek: 1,
+            twoDigitYearMax: 2029,
+        }
+
+        return CultureInfo;
+    }
 
 }(jQuery));
