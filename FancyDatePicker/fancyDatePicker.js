@@ -329,6 +329,7 @@
                     var start = input.getCursorPosition();
                     var key = event.keyCode == undefined ? event.which : event.keyCode;
                     var char = inputFormat[2];
+                    var reg = eval("/" + char + "/g");
                     var value = input.val()
                     var dateString = "";
                     var stringSplitter = maskText.split(char);
@@ -336,17 +337,15 @@
                     if (value.indexOf(char) != -1)
                         valueSplitter = value.split(char);
                     else valueSplitter.push(value)
-                    if (valueSplitter.length == 1 && stringSplitter[0].length == valueSplitter[0].length) {
+                    if (valueSplitter.length == 1 && stringSplitter[0].length == valueSplitter[0].length && value.match(reg) === null) {
                         value += char
                         start++;
                     }
-                    else if (valueSplitter.length == 2 && stringSplitter[1].length == valueSplitter[1].length)
-                    {
+                    else if (valueSplitter.length == 2 && stringSplitter[1].length == valueSplitter[1].length && value.match(reg).length <= 1) {
                         value += char
                         start++;
                     }
-                    else if (valueSplitter.length == 3 && stringSplitter[2].length == valueSplitter[2].length)
-                    {
+                    else if (valueSplitter.length == 3 && stringSplitter[2].length == valueSplitter[2].length && value.match(reg).length < 2) {
                         value += char
                         start++;
                     }
