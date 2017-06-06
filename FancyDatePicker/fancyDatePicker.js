@@ -329,7 +329,7 @@
                     var start = input.getCursorPosition();
                     var key = event.keyCode == undefined ? event.which : event.keyCode;
                     var char = inputFormat[2];
-                    var reg = eval("/" + char + "/g");
+                    var reg = eval("/[" + char + "]/g");
                     var value = input.val()
                     var dateString = "";
                     var stringSplitter = maskText.split(char);
