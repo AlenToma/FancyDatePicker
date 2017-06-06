@@ -1,0 +1,17 @@
+<html>
+<head>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="fancyDatePicker.js"></script>
+    <link href="fancyDatePicker.css" rel="stylesheet" />
+
+</head>
+<body>
+    <input type="text" class="date" />
+    <script>
+        $(document).ready(function () {
+            $(".date").fancyDatePicker({ format: "dd-mm-yy", readOnly: false, closeOnSelect: true });
+        })
+
+    </script>
+</body>
+</html>
