@@ -16,6 +16,8 @@
             if (input.attr("format") != undefined && input.attr("format") != "")
                 settings.format = input.attr("format");
 
+
+            var handler = settings.handler;
             var offset = input[0].getBoundingClientRect();
             /// lets create a handler
             if (settings.handler === undefined) {
@@ -24,22 +26,22 @@
                 input.replaceWith(inputcontainer);
                 inputcontainer.append(input);
                 inputcontainer.find(".calanderBoxContainer").css({ left: (offset.left + offset.width + 1) - inputcontainer.find(".calanderBoxContainer").outerWidth(true) * 1.4 })
-                settings.handler = inputcontainer.find(".calanderBox")
+                handler = inputcontainer.find(".calanderBox");
             }
 
             input.addClass("fancyDatePickerIdentifire");
             if (settings.readOnly)
                 input.attr("readonly", "readonly");
 
-            if (settings.handler == undefined)
+            if (handler == undefined)
                 settings.handler = $(this);
 
-            var handler = settings.handler;
+    
 
             if (input.attr("handler") != undefined && input.attr("handler") != "")
                 handler = $(input.attr("handler"));
 
-            settings.handler.addClass("fancyDatePickerIdentifire");
+            handler.addClass("fancyDatePickerIdentifire");
             var container = $('<div class="fancyDatePicker"></div>');
 
             function SelectDate(getOnly, date) {
