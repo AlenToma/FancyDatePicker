@@ -127,6 +127,14 @@
     top: 2px;
 }
 
+    .fancyDatePickerInputcontainer > input::selection {
+        background: rgba(20,53,80,0.14);
+    }
+
+    .fancyDatePickerInputcontainer > input::-moz-selection {
+        background: rgba(20,53,80,0.14);
+    }
+
     .fancyDatePickerInputcontainer > input:focus {
         outline: none;
     }
