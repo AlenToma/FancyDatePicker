@@ -46,7 +46,7 @@
             globalizationMapPath: "/globalization/"
         }, options);
         $(this).each(function () {
-
+            Date.CultureInfo = enus();
             var inputSelectedDate = settings.selectedDate;
             var culture;
             function loadLocalCulture() {
@@ -57,6 +57,8 @@
                 if (culture)
                     culture();
             }
+
+
             // load culture
             var cultureName = settings.culture.toLowerCase().replace("-", "");
             if (Date.CultureInfo == undefined || Date.CultureInfo.name != settings.culture) {
