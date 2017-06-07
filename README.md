@@ -29,4 +29,7 @@ https://codepen.io/AlenToma/pen/owXYKj?editors=0100
  //closeOnSelect
  
  closeOnSelect: true,
+ 
+ //incase you want a datetime picker
+ useTime: true
     
