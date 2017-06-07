@@ -50,7 +50,7 @@
             var inputSelectedDate = settings.selectedDate;
             var culture;
             function loadLocalCulture() {
-                culture = eval(cultureName);
+                culture = eval(enus);
                 if (culture == undefined || culture === null) {
                     culture = enus;
                 }
