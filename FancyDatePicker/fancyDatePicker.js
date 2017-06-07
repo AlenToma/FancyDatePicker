@@ -68,7 +68,7 @@
                 inputcontainer.height(input.outerHeight(true));
                 input.replaceWith(inputcontainer);
                 inputcontainer.append(input);
-                inputcontainer.find(".calanderBoxContainer").css({ left: (offset.left + offset.width + 1) - inputcontainer.find(".calanderBoxContainer").outerWidth(true) * 1.4 })
+                inputcontainer.find(".calanderBoxContainer").css({ left: (offset.width + (inputcontainer.find(".calanderBoxContainer").width() / 2) + 1) - inputcontainer.find(".calanderBoxContainer").outerWidth(true) * 1.4 });
                 handler = inputcontainer.find(".calanderBox");
             }
 
