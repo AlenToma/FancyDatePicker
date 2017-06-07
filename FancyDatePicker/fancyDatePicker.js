@@ -460,6 +460,7 @@
                         return true;
                     }
 
+                   
                     var start = input.getCursorPosition();
                     var key = event.keyCode == undefined ? event.which : event.keyCode;
                     var char = inputFormat[2];
@@ -467,6 +468,13 @@
                     var value = input.val().toUpperCase();
                     var dateString = "";
                     var stringSplitter = (inputFormat).replace("yy", "yyyy").toLowerCase().split(char);
+                    var lastChars = "";
+                    if (value.indexOf("P") != -1)
+                        lastChars = value.substring(value.indexOf("P"));
+                    else if (value.indexOf("A") != -1)
+                        lastChars = value.substring(value.indexOf("P"));
+                    value = value.replace("PM", "").replace("AM", "").trim();
+
                     if (timeFormat != "") {
                         stringSplitter.push("hh");
                         //stringSplitter.push(":");
@@ -486,6 +494,10 @@
                                 valueSplitter.pop();
                                 valueSplitter = valueSplitter.concat(lastItem.split(":"));
                             }
+                        }
+                        if (lastChars.length > 0) {
+                            valueSplitter.push(" " + lastChars);
+                            value = value + " " + lastChars;
                         }
                     }
                     else valueSplitter.push(value)
@@ -508,7 +520,7 @@
                         value += " ";
                     }
                     if (value.length > maskText.length)
-                        value = value.substring(0, value.length - 1);
+                        value = value.substring(0, maskText.length - 1);
                     result = value;
                     if (result != input.val() || (container != undefined && container.length > 0 && container.is(":visible") && SelectDate(true, settings.selectedDate) != result)) {
                         input.val(result);
