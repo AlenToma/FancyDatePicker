@@ -6,10 +6,14 @@
 
 </head>
 <body>
-    <input type="text" class="date" />
+    <div style="width:300px; margin:auto;">
+
+
+        <input type="text" class="date" />
+    </div>
     <script>
         $(document).ready(function () {
-            $(".date").fancyDatePicker({ format: "dd-mm-yy", readOnly: false, closeOnSelect: true });
+            $(".date").fancyDatePicker({ readOnly: false, closeOnSelect: false, useTime: true, culture:"nb-NO" });
         })
 
     </script>

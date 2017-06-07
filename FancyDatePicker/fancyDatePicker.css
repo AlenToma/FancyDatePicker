@@ -155,19 +155,38 @@
     position: relative;
     top: 2px;
     text-transform: uppercase;
+    display: block;
 }
 
-    .fancyDatePickerInputcontainer > input::selection {
-        background: rgba(20,53,80,0.14);
+    .fancyDatePickerInputcontainer > input::-webkit-input-placeholder {
+        font-size: 11px;
     }
 
-    .fancyDatePickerInputcontainer > input::-moz-selection {
-        background: rgba(20,53,80,0.14);
+    .fancyDatePickerInputcontainer > input::-moz-placeholder {
+        font-size: 11px;
     }
+/* Firefox 19+ */
+    .fancyDatePickerInputcontainer > input:-moz-placeholder {
+        font-size: 11px;
+    }
+/* Firefox 18- */
+    .fancyDatePickerInputcontainer > input:-ms-input-placeholder {
+        font-size:11px;
+    }
+/* IE */
 
-    .fancyDatePickerInputcontainer > input:focus, .fancyDatePicker input:focus {
-        outline: none;
-    }
+
+.fancyDatePickerInputcontainer > input::selection {
+    background: rgba(20,53,80,0.14);
+}
+
+.fancyDatePickerInputcontainer > input::-moz-selection {
+    background: rgba(20,53,80,0.14);
+}
+
+.fancyDatePickerInputcontainer > input:focus, .fancyDatePicker input:focus {
+    outline: none;
+}
 
 .fancyDatePickerInputcontainer > .calanderBoxContainer {
     height: 100%;
@@ -229,7 +248,6 @@
 
     .fancyDatePicker .timeControl > .pmam {
         margin-left: 6px;
-
     }
 
 .fancyDatePicker .timeText {

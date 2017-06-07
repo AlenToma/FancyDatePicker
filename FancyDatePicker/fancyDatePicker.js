@@ -37,41 +37,83 @@
             selectedDate: undefined,
             onDayClick: undefined,
             handler: undefined,
-            format: "mm/dd/yy",
+            format: undefined,
             readOnly: false,
             useMask: true,
             closeOnSelect: true,
             culture: "en-US",
             useTime: false,
+            globalizationMapPath: "/globalization/"
         }, options);
         $(this).each(function () {
 
             var inputSelectedDate = settings.selectedDate;
-
-            var cultureName = settings.culture.toLowerCase().replace("-", "");
-            var culture = eval(cultureName);
-            if (culture == undefined || culture === null) {
-                culture = enus;
+            var culture;
+            function loadLocalCulture() {
+                culture = eval(cultureName);
+                if (culture == undefined || culture === null) {
+                    culture = enus;
+                }
+                if (culture)
+                    culture();
             }
-            if (culture)
-                culture = culture();
+            // load culture
+            var cultureName = settings.culture.toLowerCase().replace("-", "");
+            if (Date.CultureInfo == undefined || Date.CultureInfo.name != settings.culture) {
+                var url = settings.globalizationMapPath + settings.culture + ".js";
+                try {
+                    $.ajax({
+                        async: false,
+                        url: url,
+                        dataType: "script"
+                    }).error(function () { });
+                }
+                catch (err) { }
+            }
 
-
+            if (Date.CultureInfo == undefined)
+                loadLocalCulture();
+            culture = Date.CultureInfo;
             var input = $(this);
             var inputFormat = settings.format;
-            var timeFormat = settings.useTime ? " hh:mm tt" : "";
+            var char = undefined;
+
+            var timeFormat = settings.useTime ? " " + (culture.formatPatterns.shortTime.toLowerCase() + " ").replace(/:[m]{1} /g, ":mm").replace(/^[h]{1}:/g, "hh:").trim() : "";
             if (input.attr("format") != undefined && input.attr("format") != "")
                 inputFormat = input.attr("format");
 
+            if (inputFormat === undefined || inputFormat === "")
+                inputFormat = culture.formatPatterns.shortDate;
+
+            inputFormat = inputFormat.toLowerCase();
+            /// test
+            //culture.amDesignator = "";
+            //culture.pmDesignator = "";
+            //timeFormat = timeFormat.replace(" tt", "").trim();
+            ///
+            char = inputFormat.replace(/[a-y]/g, "")[0];
+            if (inputFormat.indexOf("m") != -1 && inputFormat.indexOf("mm") == -1)
+                inputFormat = inputFormat.replace(/[m]/g, "mm");
+
+            if (inputFormat.indexOf("m") != -1 && inputFormat.indexOf("dd") == -1)
+                inputFormat = inputFormat.replace(/[d]/g, "dd");
+
+
+
             var handler = settings.handler;
-            var offset = input[0].getBoundingClientRect();
+
             /// lets create a handler
             if (settings.handler === undefined) {
                 var inputcontainer = $("<div class='fancyDatePickerInputcontainer fancyDatePickerIdentifire'><div class='calanderBoxContainer fancyDatePickerIdentifire'><div class='calanderBox'></div></div></div>");
                 inputcontainer.height(input.outerHeight(true));
                 input.replaceWith(inputcontainer);
                 inputcontainer.append(input);
-                inputcontainer.find(".calanderBoxContainer").css({ left: (offset.width + (inputcontainer.find(".calanderBoxContainer").width() / 2) + 1) - inputcontainer.find(".calanderBoxContainer").outerWidth(true) * 1.4 });
+                input.css({ width: input.outerWidth(true) + inputcontainer.find(".calanderBox").outerWidth(true) })
+
+                var offset = inputcontainer[0].getBoundingClientRect();
+                inputcontainer.find(".calanderBoxContainer").css({ left: (offset.width) - (inputcontainer.find(".calanderBox").outerWidth(true) * 1.7) });
+
+                //(offset.width + (inputcontainer.find(".calanderBoxContainer").width() / 2) + 1) - inputcontainer.find(".calanderBoxContainer").outerWidth(true) * 1.4
                 handler = inputcontainer.find(".calanderBox");
             }
 
@@ -94,21 +136,28 @@
                 if (date == undefined)
                     date = new Date();
 
-                var char = inputFormat[2];
                 var dateString = "";
                 var stringSplitter = inputFormat.split(char);
                 if (timeFormat != "") {
-                    stringSplitter.push("hh");
-                    stringSplitter.push(":");
-                    stringSplitter.push("mmm");
-                    stringSplitter.push(" ");
-                    stringSplitter.push("tt");
+                    var timeSpliter = timeFormat.trim().toLowerCase().replace(":mm", ":mmm").split(":");
+                    var lastItem = timeSpliter[timeSpliter.length - 1];
+                    if (lastItem.indexOf("tt") != -1) {
+                        timeSpliter.pop();
+                        timeSpliter = timeSpliter.concat(lastItem.split(" "));
+                        timeSpliter.splice(timeSpliter.length - 1, 0, " ");
+                    }
+                    timeSpliter.splice(1, 0, ":");
+                    stringSplitter = stringSplitter.concat(timeSpliter);
+                    //stringSplitter.push("hh");
+                    //stringSplitter.push(":");
+                    //stringSplitter.push("mmm");
+                    //stringSplitter.push(" ");
+                    //stringSplitter.push("tt");
                 }
                 var counter = 0;
                 var time = "";
                 var hours = date.getHours();
-                hours = date.getHours();
-                if (date.getHours() > 12)
+                if ((date.getHours() > 12 && (culture.amDesignator != "")) )
                     hours = ((hours + 11) % 12 + 1);
 
                 while (counter != stringSplitter.length) {
@@ -117,13 +166,13 @@
                     if (counter > 0)
                         dateString += char;
 
-                    if (str == "dd") {
+                    if (str == "dd" || str == "d") {
                         dateString += date.getDate() <= 9 ? "0" + date.getDate() : date.getDate();
-                    } else if (str == "mm") {
+                    } else if (str == "mm" || str == "m") {
                         dateString += date.getMonth() + 1 <= 9 ? "0" + (date.getMonth() + 1) : (date.getMonth() + 1);
-                    } else if (str == "yy") {
+                    } else if (str == "yy" || str === "yyyy") {
                         dateString += date.getFullYear();
-                    } else if (str == "hh") {
+                    } else if (str == "hh" || str === "h") {
                         time += hours <= 9 ? "0" + (hours) : (hours);
                         addChar = false;
                     } else if (str == " ") {
@@ -136,11 +185,9 @@
                         time += date.getMinutes() <= 9 ? "0" + (date.getMinutes()) : (date.getMinutes());
                         addChar = false;
                     } else if (str == "tt") {
-                        time += date.getHours() >= 12 ? "PM" : "AM";
+                        time += date.getHours() >= 12 ? culture.pmDesignator : culture.amDesignator;
                         addChar = false;
                     } else addChar = false;
-
-
                     if (counter > 0 && !addChar) {
                         dateString = dateString.substring(0, dateString.length - 1);// remove last char
                     }
@@ -164,6 +211,8 @@
                     inputSelectedDate = new Date();
                 else if (inputSelectedDate === undefined) {
                     inputSelectedDate = new Date(input.val());
+                    if (isNaN(inputSelectedDate.getDate()))
+                        inputSelectedDate = new Date();
                     if (!hasIni && settings.useTime && input.val().indexOf(":") === -1) {
                         var time = new Date();
                         inputSelectedDate.setHours(time.getHours(), time.getMinutes(), 0, 0);
@@ -324,14 +373,18 @@
 
                     timeContainer.find(".hour").html(hours <= 9 ? "0" + hours : hours);
                     timeContainer.find(".minutes").html(inputSelectedDate.getMinutes() < 9 ? "0" + inputSelectedDate.getMinutes() : inputSelectedDate.getMinutes());
-                    timeContainer.find(".pmam").html(inputSelectedDate.getHours() >= 12 ? "PM" : "AM");
+                    //if (input.attr("indicator") != "" && input.attr("indicator") !== undefined && culture.amDesignator != "")
+                    //    timeContainer.find(".pmam").html(input.attr("indicator"));
+                    //else
+                        timeContainer.find(".pmam").html(inputSelectedDate.getHours() >= 12 ? "PM" : "AM");
+
 
                     timeContainer.find(".minutes, .hour").click(function () {
                         $(".timeDialog").remove();
                         var span = $(this);
                         var timeControls = $("<div class='timeDialog fancyDatePickerIdentifire' ></div>");
                         if (span.hasClass("hour")) {
-                            for (var i = 1; i <= 11; i++) {
+                            for (var i = 1; i <= (culture.pmDesignator == "" ? 12 : 11); i++) {
                                 var timeText = i <= 9 ? "0" + i : i;
                                 timeControls.append("<div class='tm fancyDatePickerIdentifire'>" + timeText + "</div>");
                             }
@@ -368,7 +421,7 @@
                         var hours = Number(time.match(/^(\d+)/)[1]);
                         var minutes = Number(time.match(/:(\d+)/)[1]);
                         var AMPM = time.match(/\s(.*)$/)[1];
-                        if (AMPM == "AM" && hours >= 12)
+                        if (AMPM == "AM" && ((hours >= 12 && culture.pmDesignator != "") || hours > 12))
                             hours = ((hours + 11) % 12 + 1);
                         else {
                             if (AMPM == "PM" && hours < 12) hours = hours + 12;
@@ -384,13 +437,15 @@
                     }
 
                     timeContainer.find(".pmam").click(function () {
-                        if ($(this).html().indexOf("PM") != -1) {
-                            $(this).html("AM");
+                        var orgValue = $(this).html();
+                        if (orgValue.indexOf("PM") != -1) {
+                            orgValue = "AM";
                         }
                         else {
-                            $(this).html("PM");
+                            orgValue = "PM";
                         }
-                        var orgValue = $(this).html();
+                        input.attr("indicator", orgValue);
+
                         convertTimeformat(inputSelectedDate.getHours() + ":" + inputSelectedDate.getMinutes() + " " + orgValue);
                         BuildDate();
 
@@ -451,7 +506,6 @@
                     var start = input.getCursorPosition();
                     var end = start;
                     var value = input.val();
-                    var char = inputFormat[2];
                     while (value[start] != char && start >= 0 && !isEmptyOrSpaces(value[start]) && value[start] != ":")
                         start--;
                     if (start < 0)
@@ -468,7 +522,7 @@
             }
 
             if (settings.useMask) {
-                var maskText = (inputFormat + timeFormat).replace("yy", "yyyy").toLowerCase();
+                var maskText = (inputFormat + " " + timeFormat.trim()).toLowerCase();
                 var result;
                 var keyisDown = false;
                 input.unbind("keypress.fancyDatePicker");
@@ -492,23 +546,39 @@
 
                     var start = input.getCursorPosition();
                     var key = event.keyCode == undefined ? event.which : event.keyCode;
-                    var char = inputFormat[2];
                     var reg = eval("/[" + char + "]/g");
                     var value = input.val().toUpperCase();
                     var dateString = "";
-                    var stringSplitter = (inputFormat).replace("yy", "yyyy").toLowerCase().split(char);
+                    var stringSplitter = (inputFormat).toLowerCase().split(char);
                     var lastChars = "";
                     if (value.indexOf("P") != -1)
                         lastChars = value.substring(value.indexOf("P"));
                     else if (value.indexOf("A") != -1)
-                        lastChars = value.substring(value.indexOf("P"));
-                    value = value.replace(/([PM|AM])/g, "").trim();
+                        lastChars = value.substring(value.indexOf("A"));
+                    value = value.replace(eval("/([" + culture.pmDesignator + "|" + culture.amDesignator + "])/g"), "").trim();
+
+                    //if (timeFormat != "") {
+                    //    stringSplitter = stringSplitter.concat(timeFormat.trim().split(":"))
+                    //    //stringSplitter.push("hh");
+                    //    ////stringSplitter.push(":");
+                    //    //stringSplitter.push("mm");
+                    //    //stringSplitter.push("tt");
+                    //}
 
                     if (timeFormat != "") {
-                        stringSplitter.push("hh");
-                        //stringSplitter.push(":");
-                        stringSplitter.push("mm");
-                        stringSplitter.push("tt");
+                        timeFormat += " ";
+                        var timeSpliter = timeFormat.toLowerCase().trim().split(":");
+                        var lastItem = timeSpliter[timeSpliter.length - 1];
+                        if (lastItem.indexOf("tt") != -1) {
+                            timeSpliter.pop();
+                            timeSpliter = timeSpliter.concat(lastItem.split(" "));
+                        }
+                        timeSpliter.splice(1, 0, ":");
+                        stringSplitter = stringSplitter.concat(timeSpliter);
+                        //stringSplitter.push("hh");
+                        ////stringSplitter.push(":");
+                        //stringSplitter.push("mm");
+                        //stringSplitter.push("tt");
                     }
 
                     var valueSplitter = [];
@@ -521,7 +591,9 @@
                             lastItem = valueSplitter[valueSplitter.length - 1];
                             if (lastItem.indexOf(":") != -1) {
                                 valueSplitter.pop();
-                                valueSplitter = valueSplitter.concat(lastItem.split(":"));
+                                var timeCon = lastItem.split(":");
+                                timeCon.splice(1, 0, ":");
+                                valueSplitter = valueSplitter.concat(timeCon);
                             }
                         }
                         if (lastChars.length > 0) {
@@ -547,9 +619,18 @@
                     } else if (valueSplitter.length == 5 && stringSplitter[4].length == valueSplitter[4].length && value.match(/:/g) !== null) {
                         start++;
                         value += " ";
+                    } else if (culture.pmDesignator != "" && valueSplitter.length == 6 && stringSplitter[5].length == valueSplitter[5].length && value.match(/:/g) !== null) {
+                        start++;
+                        value += " ";
                     }
                     if (value.length > maskText.length)
-                        value = value.substring(0, maskText.length - 1);
+                        value = value.substring(0, maskText.length);
+                    if (value.indexOf("12:") && culture.amDesignator != "") {
+
+                        value=  value.replace("12:", "11:");
+
+                    }
+
                     result = value;
                     if (result != input.val() || (container != undefined && container.length > 0 && container.is(":visible") && SelectDate(true, inputSelectedDate) != result)) {
                         input.val(result);
@@ -561,9 +642,13 @@
                     }
                     keyisDown = false;
                 });
-                input.attr("placeholder", maskText.replace(/([y|d|m|h|t])/g, "_"));
+                //input.attr("placeholder", maskText.replace(/([y|d|m|h|t])/g, "_"));
+                input.attr("placeholder", maskText.toUpperCase());
 
-
+                input.change(function () {
+                    validateInputDate();
+                    SelectDate(false, inputSelectedDate);
+                })
             }
 
             $(document).click(function (e) {
@@ -580,9 +665,10 @@
         });
     };
 
+    /// Default Lang other lang us contained in globalization map
     function enus() {
 
-        var CultureInfo = {
+        Date.CultureInfo = {
             /* Culture Name */
             name: "en-US",
             englishName: "English (United States)",
@@ -603,100 +689,22 @@
             pmDesignator: "PM",
 
             firstDayOfWeek: 0,
-            twoDigitYearMax: 2029
-        }
-
-        return CultureInfo;
-    }
-
-
-    function engb() {
-
-        var CultureInfo = {
-            name: "en-GB",
-            englishName: "English (United Kingdom)",
-            nativeName: "English (United Kingdom)",
-
-            /* Day Name Strings */
-            dayNames: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-            abbreviatedDayNames: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-            shortestDayNames: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
-            firstLetterDayNames: ["S", "M", "T", "W", "T", "F", "S"],
-
-            /* Month Name Strings */
-            monthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
-            abbreviatedMonthNames: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-
-            /* AM/PM Designators */
-            amDesignator: "AM",
-            pmDesignator: "PM",
-
-            firstDayOfWeek: 1,
             twoDigitYearMax: 2029,
+            dateElementOrder: "mdy",
+
+            /* Standard date and time format patterns */
+            formatPatterns: {
+                shortDate: "M/d/yyyy",
+                longDate: "dddd, MMMM dd, yyyy",
+                shortTime: "h:mm tt",
+                longTime: "h:mm:ss tt",
+                fullDateTime: "dddd, MMMM dd, yyyy h:mm:ss tt",
+                sortableDateTime: "yyyy-MM-ddTHH:mm:ss",
+                universalSortableDateTime: "yyyy-MM-dd HH:mm:ssZ",
+                rfc1123: "ddd, dd MMM yyyy HH:mm:ss GMT",
+                monthDay: "MMMM dd",
+                yearMonth: "MMMM, yyyy"
+            }
         }
-
-        return CultureInfo;
     }
-
-
-    function svse() {
-
-        var CultureInfo = {
-            /* Culture Name */
-            name: "sv-SE",
-            englishName: "Swedish (Sweden)",
-            nativeName: "svenska (Sverige)",
-
-            /* Day Name Strings */
-            dayNames: ["Söndag", "Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag"],
-            abbreviatedDayNames: ["Sö", "Så", "Ti", "On", "To", "Fr", "Lö"],
-            shortestDayNames: ["Sö", "Må", "Ti", "On", "To", "Fr", "Lö"],
-            firstLetterDayNames: ["s", "m", "t", "o", "t", "f", "l"],
-
-            /* Month Name Strings */
-            monthNames: ["Januari", "Februari", "Mars", "April", "Maj", "Juni", "Juli", "Augusti", "September", "Oktober", "November", "December"],
-            abbreviatedMonthNames: ["Jan", "Feb", "Mar", "Apr", "Maj", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dec"],
-
-            /* AM/PM Designators */
-            amDesignator: "",
-            pmDesignator: "",
-
-            firstDayOfWeek: 1,
-            twoDigitYearMax: 2029,
-        }
-
-        return CultureInfo;
-    }
-
-
-
-
-    function nbno() {
-
-        var CultureInfo = {
-            name: "nb-NO",
-            englishName: "Norwegian, Bokmål (Norway)",
-            nativeName: "norsk, bokmål (Norge)",
-
-            /* Day Name Strings */
-            dayNames: ["Søndag", "Mandag", "Tirsdag", "Onsdag", "Torsdag", "Fredag", "Lørdag"],
-            abbreviatedDayNames: ["Sø", "Ma", "Ti", "On", "To", "Fr", "Lø"],
-            shortestDayNames: ["Sø", "Ma", "Ti", "On", "To", "Fr", "Lø"],
-            firstLetterDayNames: ["S", "M", "T", "O", "T", "F", "L"],
-
-            /* Month Name Strings */
-            monthNames: ["Januar", "Februar", "Mars", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Desember"],
-            abbreviatedMonthNames: ["Jan", "Feb", "Mar", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Des"],
-
-            /* AM/PM Designators */
-            amDesignator: "",
-            pmDesignator: "",
-
-            firstDayOfWeek: 1,
-            twoDigitYearMax: 2029,
-        }
-
-        return CultureInfo;
-    }
-
 }(jQuery));
