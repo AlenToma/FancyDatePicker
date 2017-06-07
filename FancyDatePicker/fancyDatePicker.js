@@ -42,7 +42,7 @@
             useMask: true,
             closeOnSelect: true,
             culture: "en-US",
-            useTime: false
+            useTime: false,
         }, options);
         $(this).each(function () {
             var cultureName = settings.culture.toLowerCase().replace("-", "");
@@ -313,7 +313,7 @@
                         var span = $(this);
                         var timeControls = $("<div class='timeDialog fancyDatePickerIdentifire' ></div>");
                         if (span.hasClass("hour")) {
-                            for (var i = 1; i <= 12; i++) {
+                            for (var i = 1; i <= 11; i++) {
                                 var timeText = i <= 9 ? "0" + i : i;
                                 timeControls.append("<div class='tm fancyDatePickerIdentifire'>" + timeText + "</div>");
                             }
@@ -609,7 +609,7 @@
             /* Day Name Strings */
             dayNames: ["Söndag", "Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag"],
             abbreviatedDayNames: ["Sö", "Så", "Ti", "On", "To", "Fr", "Lö"],
-            shortestDayNames: ["Sö", "Så", "Ti", "On", "To", "Fr", "Lö"],
+            shortestDayNames: ["Sö", "Må", "Ti", "On", "To", "Fr", "Lö"],
             firstLetterDayNames: ["s", "m", "t", "o", "t", "f", "l"],
 
             /* Month Name Strings */
