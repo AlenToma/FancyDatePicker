@@ -45,6 +45,9 @@
             useTime: false,
         }, options);
         $(this).each(function () {
+
+            var inputSelectedDate = settings.selectedDate;
+
             var cultureName = settings.culture.toLowerCase().replace("-", "");
             var culture = eval(cultureName);
             if (culture == undefined || culture === null) {
@@ -59,8 +62,6 @@
             var timeFormat = settings.useTime ? " hh:mm tt" : "";
             if (input.attr("format") != undefined && input.attr("format") != "")
                 inputFormat = input.attr("format");
-
-
 
             var handler = settings.handler;
             var offset = input[0].getBoundingClientRect();
@@ -158,9 +159,26 @@
                 return dateString;
             }
 
+            function validateInputDate() {
+                if (inputSelectedDate === undefined && input.val().length <= 1)
+                    inputSelectedDate = new Date();
+                else if (inputSelectedDate === undefined) {
+                    inputSelectedDate = new Date(input.val());
+                    if (!hasIni && settings.useTime && input.val().indexOf(":") === -1) {
+                        var time = new Date();
+                        inputSelectedDate.setHours(time.getHours(), time.getMinutes(), 0, 0);
+                        input.val(SelectDate(true, inputSelectedDate));
+                    }
+                }
+            }
+
+
+
             var now = undefined;
             var timeout = undefined;
             var orgBackGound = undefined;
+            var hasIni = false;
+            validateInputDate();
             function BuildDate(staticDate, slow) {
                 if (input.parent().find(".calanderBoxContainer").length > 0) {
                     if (orgBackGound == undefined)
@@ -179,15 +197,11 @@
                 }
 
                 if (!staticDate) {
-                    if (settings.selectedDate === undefined && input.val().length <= 1)
-                        settings.selectedDate = new Date();
-                    else if (settings.selectedDate === undefined)
-                        settings.selectedDate = new Date(input.val());
-
+                    validateInputDate();
                 }
 
-                if (isNaN(settings.selectedDate.getDate()))
-                    settings.selectedDate = new Date();
+                if (isNaN(inputSelectedDate.getDate()))
+                    inputSelectedDate = new Date();
 
                 var dateNum = [0, 1, 2, 3, 4, 5, 6]
                 function getDaysInMonth(month, year) {
@@ -219,23 +233,23 @@
                 /// Header
 
                 dayContainer.append("<div class='prev fancyDatePickerIdentifire'></div><div class='selectedMonth fancyDatePickerIdentifire'></div><div class='next fancyDatePickerIdentifire'></div>")
-                dayContainer.find(".selectedMonth").html(culture.monthNames[settings.selectedDate.getMonth()] + " " + settings.selectedDate.getFullYear());
+                dayContainer.find(".selectedMonth").html(culture.monthNames[inputSelectedDate.getMonth()] + " " + inputSelectedDate.getFullYear());
                 dayContainer.find(".prev").click(function () {
-                    if (settings.selectedDate.getMonth() - 1 >= 0)
-                        settings.selectedDate.setMonth(settings.selectedDate.getMonth() - 1);
+                    if (inputSelectedDate.getMonth() - 1 >= 0)
+                        inputSelectedDate.setMonth(inputSelectedDate.getMonth() - 1);
                     else {
-                        settings.selectedDate.setYear(settings.selectedDate.getFullYear() - 1);
-                        settings.selectedDate.setMonth(11);
+                        inputSelectedDate.setYear(inputSelectedDate.getFullYear() - 1);
+                        inputSelectedDate.setMonth(11);
                     }
                     BuildDate(true);
                 });
 
                 dayContainer.find(".next").click(function () {
-                    if (settings.selectedDate.getMonth() + 1 <= 11)
-                        settings.selectedDate.setMonth(settings.selectedDate.getMonth() + 1);
+                    if (inputSelectedDate.getMonth() + 1 <= 11)
+                        inputSelectedDate.setMonth(inputSelectedDate.getMonth() + 1);
                     else {
-                        settings.selectedDate.setYear(settings.selectedDate.getFullYear() + 1);
-                        settings.selectedDate.setMonth(1);
+                        inputSelectedDate.setYear(inputSelectedDate.getFullYear() + 1);
+                        inputSelectedDate.setMonth(1);
                     }
                     BuildDate(true);
                 });
@@ -252,12 +266,12 @@
                 dayContainer = $('<div class="dayContainer"></div>');
                 container.append(dayContainer);
                 if (now == undefined)
-                    now = new Date(settings.selectedDate);
+                    now = new Date(inputSelectedDate);
                 var days = getDaysInMonth(now.getMonth(), now.getFullYear());
-                var tempDate = new Date(settings.selectedDate);
+                var tempDate = new Date(inputSelectedDate);
                 var exist = $.grep(days, function (a) { return a.setHours(0, 0, 0, 0) == tempDate.setHours(0, 0, 0, 0) });
                 if (exist.length <= 0) {
-                    now = settings.selectedDate;
+                    now = inputSelectedDate;
                     days = getDaysInMonth(now.getMonth(), now.getFullYear());
                 }
 
@@ -277,17 +291,21 @@
                     var day = $('<div date="" class="day">' + (dayNum) + '</div>');
                     if (this.getMonth() != now.getMonth())
                         day.addClass("notCurrentMonth");
-                    date.setHours(settings.selectedDate.getHours());
-                    date.setMinutes(settings.selectedDate.getMinutes());
+                    date.setHours(inputSelectedDate.getHours());
+                    date.setMinutes(inputSelectedDate.getMinutes());
                     var tempDatev2 = new Date(this)
                     if (tempDatev2.setHours(0, 0, 0, 0) === tempDate.setHours(0, 0, 0, 0))
                         day.addClass("selectedDate");
                     day.click(function () {
 
-                        settings.selectedDate = date;
+                        inputSelectedDate = date;
                         SelectDate(false, date);
-                        if (settings.onDayClick != undefined)
-                            settings.onDayClick(settings, SelectDate(true, date));
+                        if (settings.onDayClick != undefined) {
+                            var option = { selectedDate: inputSelectedDate };
+                            $.extend(option, settings);
+                            settings.onDayClick(option, SelectDate(true, date));
+
+                        }
 
                         if (!settings.closeOnSelect)
                             BuildDate();
@@ -300,13 +318,13 @@
                 container.css({ top: offset.top + offset.height, left: offset.left });
                 if (settings.useTime) {
                     var timeContainer = $('<div class="dayContainer timeControl fancyDatePickerIdentifire"><span class="timeText"></span><span class="hour fancyDatePickerIdentifire"></span><span class="timeSeperator fancyDatePickerIdentifire">:</span><span class="minutes fancyDatePickerIdentifire"></span><span class="pmam fancyDatePickerIdentifire"></span></div>');
-                    var hours = settings.selectedDate.getHours();
+                    var hours = inputSelectedDate.getHours();
                     if (hours > 12)
                         hours = ((hours + 11) % 12 + 1);
 
                     timeContainer.find(".hour").html(hours <= 9 ? "0" + hours : hours);
-                    timeContainer.find(".minutes").html(settings.selectedDate.getMinutes() < 9 ? "0" + settings.selectedDate.getMinutes() : settings.selectedDate.getMinutes());
-                    timeContainer.find(".pmam").html(settings.selectedDate.getHours() >= 12 ? "PM" : "AM");
+                    timeContainer.find(".minutes").html(inputSelectedDate.getMinutes() < 9 ? "0" + inputSelectedDate.getMinutes() : inputSelectedDate.getMinutes());
+                    timeContainer.find(".pmam").html(inputSelectedDate.getHours() >= 12 ? "PM" : "AM");
 
                     timeContainer.find(".minutes, .hour").click(function () {
                         $(".timeDialog").remove();
@@ -360,10 +378,9 @@
                         var sMinutes = minutes.toString();
                         if (hours < 10) sHours = "0" + sHours;
                         if (minutes < 10) sMinutes = "0" + sMinutes;
-                        settings.selectedDate.setHours(parseInt(sHours));
-                        settings.selectedDate.setMinutes(parseInt(sMinutes));
-                        SelectDate(undefined, settings.selectedDate, true);
-
+                        inputSelectedDate.setHours(parseInt(sHours));
+                        inputSelectedDate.setMinutes(parseInt(sMinutes));
+                        SelectDate(undefined, inputSelectedDate, true);
                     }
 
                     timeContainer.find(".pmam").click(function () {
@@ -374,11 +391,12 @@
                             $(this).html("PM");
                         }
                         var orgValue = $(this).html();
-                        convertTimeformat(settings.selectedDate.getHours() + ":" + settings.selectedDate.getMinutes() + " " + orgValue);
+                        convertTimeformat(inputSelectedDate.getHours() + ":" + inputSelectedDate.getMinutes() + " " + orgValue);
                         BuildDate();
 
                     });
                     container.append(timeContainer);
+                    hasIni = true;
                 }
 
 
@@ -389,10 +407,14 @@
                 dayContainer.append("<div class='footer fancyDatePickerIdentifire'><div class='today fancyDatePickerIdentifire'>" + todayString + "</div></div>");
 
                 dayContainer.click(function () {
-                    settings.selectedDate = today;
+                    inputSelectedDate = today;
                     SelectDate(false, today);
-                    if (settings.onDayClick != undefined)
-                        settings.onDayClick(settings, SelectDate(true, today));
+                    if (settings.onDayClick != undefined) {
+                        var option = { selectedDate: inputSelectedDate };
+                        $.extend(option, settings);
+                        settings.onDayClick(option, SelectDate(true, today));
+
+                    }
 
                     if (!settings.closeOnSelect)
                         BuildDate();
@@ -408,8 +430,15 @@
             $(this).unbind("click.fancyDatePicker");
             $(handler).bind("click.fancyDatePicker", function () {
                 now = undefined;
-                settings.selectedDate = undefined;
-                BuildDate(undefined, true);
+                inputSelectedDate = undefined;
+
+                if (handler.hasClass("calanderBox") && container.is(":visible")) {
+                    container.slideUp(200, function () {
+                        container.remove();
+                        $(".timeDialog").remove();
+                    });
+                } else BuildDate(undefined, true);
+
 
             });
 
@@ -460,7 +489,7 @@
                         return true;
                     }
 
-                   
+
                     var start = input.getCursorPosition();
                     var key = event.keyCode == undefined ? event.which : event.keyCode;
                     var char = inputFormat[2];
@@ -473,7 +502,7 @@
                         lastChars = value.substring(value.indexOf("P"));
                     else if (value.indexOf("A") != -1)
                         lastChars = value.substring(value.indexOf("P"));
-                    value = value.replace("PM", "").replace("AM", "").trim();
+                    value = value.replace(/([PM|AM])/g, "").trim();
 
                     if (timeFormat != "") {
                         stringSplitter.push("hh");
@@ -522,17 +551,17 @@
                     if (value.length > maskText.length)
                         value = value.substring(0, maskText.length - 1);
                     result = value;
-                    if (result != input.val() || (container != undefined && container.length > 0 && container.is(":visible") && SelectDate(true, settings.selectedDate) != result)) {
+                    if (result != input.val() || (container != undefined && container.length > 0 && container.is(":visible") && SelectDate(true, inputSelectedDate) != result)) {
                         input.val(result);
                         if (container != undefined && container.length > 0 && container.is(":visible")) {
-                            settings.selectedDate = undefined;
+                            inputSelectedDate = undefined;
                             BuildDate();
                         }
                         input.setInputSelection(start, start);
                     }
                     keyisDown = false;
                 });
-                input.attr("placeholder", maskText.replace(/y/g, "_").replace(/d/g, "_").replace(/m/g, "_").replace(/h/g, "_").replace(/t/g, "_"));
+                input.attr("placeholder", maskText.replace(/([y|d|m|h|t])/g, "_"));
 
 
             }
@@ -544,7 +573,7 @@
                         container.remove();
                         $(".timeDialog").remove();
                     })
-                    settings.selectedDate = undefined;
+                    inputSelectedDate = undefined;
                     now = undefined;
                 }
             });
