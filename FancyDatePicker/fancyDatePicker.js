@@ -374,6 +374,11 @@
                     if (hours > 12)
                         hours = ((hours + 11) % 12 + 1);
 
+                    if (settings.timeOnly) {
+                        (timeContainer).css("border-top", "0");
+
+                    }
+
                     timeContainer.find(".hour").html(hours <= 9 ? "0" + hours : hours);
                     timeContainer.find(".minutes").html(inputSelectedDate.getMinutes() < 9 ? "0" + inputSelectedDate.getMinutes() : inputSelectedDate.getMinutes());
                     //if (input.attr("indicator") != "" && input.attr("indicator") !== undefined && culture.amDesignator != "")
@@ -480,12 +485,14 @@
                         BuildDate();
                 });
                 container.append(dayContainer);
+                container.css("border-top", "0");
                 container.css("min-width", input.outerWidth(true) + 3);
                 if (settings.timeOnly) {
                     container.find(".dayContainer").first().hide();
                     container.find(".dayContainer").last().hide();
+                   
                 }
-
+                
                 var allExeptLastTwo = $.grep(container.find(".dayContainer"), function (d, i) { return i < container.find(".dayContainer").length - 2 && i > 0 });
                 if (slide === "toLeft") {
                     $(allExeptLastTwo).css("left", "-" + $(allExeptLastTwo).first().width());
