@@ -43,12 +43,17 @@
             closeOnSelect: true,
             culture: "en-US",
             useTime: false,
+            timeOnly: false,
             globalizationMapPath: "/globalization/"
         }, options);
         $(this).each(function () {
+            if (settings.timeOnly)
+                settings.useTime = settings.timeOnly;
+
             Date.CultureInfo = enus();
             var inputSelectedDate = settings.selectedDate;
             var culture;
+
             function loadLocalCulture() {
                 culture = eval(enus);
                 if (culture == undefined || culture === null) {
@@ -57,7 +62,6 @@
                 if (culture)
                     culture();
             }
-
 
             // load culture
             var cultureName = settings.culture.toLowerCase().replace("-", "");
@@ -88,19 +92,12 @@
                 inputFormat = culture.formatPatterns.shortDate;
 
             inputFormat = inputFormat.toLowerCase();
-            /// test
-            //culture.amDesignator = "";
-            //culture.pmDesignator = "";
-            //timeFormat = timeFormat.replace(" tt", "").trim();
-            ///
             char = inputFormat.replace(/[a-y]/g, "")[0];
             if (inputFormat.indexOf("m") != -1 && inputFormat.indexOf("mm") == -1)
                 inputFormat = inputFormat.replace(/[m]/g, "mm");
 
             if (inputFormat.indexOf("m") != -1 && inputFormat.indexOf("dd") == -1)
                 inputFormat = inputFormat.replace(/[d]/g, "dd");
-
-
 
             var handler = settings.handler;
 
@@ -113,7 +110,7 @@
                 input.css({ width: input.outerWidth(true) + inputcontainer.find(".calanderBox").outerWidth(true) })
 
                 var offset = inputcontainer[0].getBoundingClientRect();
-                inputcontainer.find(".calanderBoxContainer").css({ left: (offset.width) - (inputcontainer.find(".calanderBox").outerWidth(true) * 1.7) });
+                inputcontainer.find(".calanderBoxContainer").css({ left: ((offset.width) - (inputcontainer.find(".calanderBox").outerWidth(true) * 1.7)) - 0.8 });
 
                 //(offset.width + (inputcontainer.find(".calanderBoxContainer").width() / 2) + 1) - inputcontainer.find(".calanderBoxContainer").outerWidth(true) * 1.4
                 handler = inputcontainer.find(".calanderBox");
@@ -134,6 +131,7 @@
             handler.addClass("fancyDatePickerIdentifire");
             var container = $('<div class="fancyDatePicker"></div>');
 
+
             function SelectDate(getOnly, date, setOnly) {
                 if (date == undefined)
                     date = new Date();
@@ -150,16 +148,11 @@
                     }
                     timeSpliter.splice(1, 0, ":");
                     stringSplitter = stringSplitter.concat(timeSpliter);
-                    //stringSplitter.push("hh");
-                    //stringSplitter.push(":");
-                    //stringSplitter.push("mmm");
-                    //stringSplitter.push(" ");
-                    //stringSplitter.push("tt");
                 }
                 var counter = 0;
                 var time = "";
                 var hours = date.getHours();
-                if ((date.getHours() > 12 && (culture.amDesignator != "")) )
+                if ((date.getHours() > 12 && (culture.amDesignator != "")))
                     hours = ((hours + 11) % 12 + 1);
 
                 while (counter != stringSplitter.length) {
@@ -199,11 +192,11 @@
 
                 dateString += " " + time;
                 if (!getOnly) {
-                    $(input).val(dateString);
+                    $(input).val(!settings.timeOnly ? dateString : time);
                     $(".timeDialog").remove();
                     container.remove();
                 } else if (setOnly) {
-                    $(input).val(dateString);
+                    $(input).val(!settings.timeOnly ? dateString : time);
                 }
                 return dateString;
             }
@@ -212,13 +205,15 @@
                 if (inputSelectedDate === undefined && input.val().length <= 1)
                     inputSelectedDate = new Date();
                 else if (inputSelectedDate === undefined) {
-                    inputSelectedDate = new Date(input.val());
+                    if (!settings.timeOnly)
+                        inputSelectedDate = new Date(input.val());
+                    else inputSelectedDate = new Date("2017-01-01 " + input.val());
                     if (isNaN(inputSelectedDate.getDate()))
                         inputSelectedDate = new Date();
                     if (!hasIni && settings.useTime && input.val().indexOf(":") === -1) {
                         var time = new Date();
                         inputSelectedDate.setHours(time.getHours(), time.getMinutes(), 0, 0);
-                        input.val(SelectDate(true, inputSelectedDate));
+                        SelectDate(false, inputSelectedDate, true);
                     }
                 }
             }
@@ -230,7 +225,7 @@
             var orgBackGound = undefined;
             var hasIni = false;
             validateInputDate();
-            function BuildDate(staticDate, slow) {
+            function BuildDate(staticDate, slide) {
                 if (input.parent().find(".calanderBoxContainer").length > 0) {
                     if (orgBackGound == undefined)
                         orgBackGound = input.parent().find(".calanderBoxContainer").css("background");
@@ -279,41 +274,46 @@
                 container = $('<div class="fancyDatePicker"></div>');
                 $("body").append(container);
 
-                var dayContainer = $('<div class="dayContainer"></div>');
-                container.append(dayContainer);
+
                 /// Header
+                if (!settings.timeOnly) {
+                    var dayContainer = $('<div class="dayContainer"></div>');
+                    container.append(dayContainer);
+                    dayContainer.append("<div class='prev fancyDatePickerIdentifire'></div><div class='selectedMonth fancyDatePickerIdentifire'></div><div class='next fancyDatePickerIdentifire'></div>")
+                    dayContainer.find(".selectedMonth").html(culture.monthNames[inputSelectedDate.getMonth()] + " " + inputSelectedDate.getFullYear());
+                    dayContainer.find(".prev").click(function () {
+                        if (inputSelectedDate.getMonth() - 1 >= 0)
+                            inputSelectedDate.setMonth(inputSelectedDate.getMonth() - 1);
+                        else {
+                            inputSelectedDate.setYear(inputSelectedDate.getFullYear() - 1);
+                            inputSelectedDate.setMonth(11);
+                        }
+                        BuildDate(true, "toRight");
+                    });
 
-                dayContainer.append("<div class='prev fancyDatePickerIdentifire'></div><div class='selectedMonth fancyDatePickerIdentifire'></div><div class='next fancyDatePickerIdentifire'></div>")
-                dayContainer.find(".selectedMonth").html(culture.monthNames[inputSelectedDate.getMonth()] + " " + inputSelectedDate.getFullYear());
-                dayContainer.find(".prev").click(function () {
-                    if (inputSelectedDate.getMonth() - 1 >= 0)
-                        inputSelectedDate.setMonth(inputSelectedDate.getMonth() - 1);
-                    else {
-                        inputSelectedDate.setYear(inputSelectedDate.getFullYear() - 1);
-                        inputSelectedDate.setMonth(11);
-                    }
-                    BuildDate(true);
-                });
+                    dayContainer.find(".next").click(function () {
+                        if (inputSelectedDate.getMonth() + 1 <= 11)
+                            inputSelectedDate.setMonth(inputSelectedDate.getMonth() + 1);
+                        else {
+                            inputSelectedDate.setYear(inputSelectedDate.getFullYear() + 1);
+                            inputSelectedDate.setMonth(1);
+                        }
+                        BuildDate(true, "toLeft");
+                    });
 
-                dayContainer.find(".next").click(function () {
-                    if (inputSelectedDate.getMonth() + 1 <= 11)
-                        inputSelectedDate.setMonth(inputSelectedDate.getMonth() + 1);
-                    else {
-                        inputSelectedDate.setYear(inputSelectedDate.getFullYear() + 1);
-                        inputSelectedDate.setMonth(1);
-                    }
-                    BuildDate(true);
-                });
 
-                dayContainer = $('<div class="dayContainer"></div>');
-                container.append(dayContainer);
+                }
                 /// Days
-                $(culture.shortestDayNames).each(function () {
-                    var day = $('<div dayName="' + this + '" class="day">' + this + '</div>');
-                    day.width(dayContainer.width() / culture.shortestDayNames.length);
-                    dayContainer.append(day);
-                });
+                if (!settings.timeOnly) {
+                    dayContainer = $('<div class="dayContainer"></div>');
+                    container.append(dayContainer);
+                    $(culture.shortestDayNames).each(function () {
+                        var day = $('<div dayName="' + this + '" class="day">' + this + '</div>');
+                        day.width(dayContainer.width() / culture.shortestDayNames.length);
+                        dayContainer.append(day);
+                    });
 
+                }
                 dayContainer = $('<div class="dayContainer"></div>');
                 container.append(dayContainer);
                 if (now == undefined)
@@ -334,36 +334,37 @@
                     container.find(".dayContainer").last().append(day);
                 }
 
-                $(days).each(function () {
-                    var date = this;
-                    var dayNum = (this.getDate());
-                    var dayName = dateNum[this.getDay()];
-                    var tempDay = container.find(".dayContainer").last().find(".day").length;
-                    var day = $('<div date="" class="day">' + (dayNum) + '</div>');
-                    if (this.getMonth() != now.getMonth())
-                        day.addClass("notCurrentMonth");
-                    date.setHours(inputSelectedDate.getHours());
-                    date.setMinutes(inputSelectedDate.getMinutes());
-                    var tempDatev2 = new Date(this)
-                    if (tempDatev2.setHours(0, 0, 0, 0) === tempDate.setHours(0, 0, 0, 0))
-                        day.addClass("selectedDate");
-                    day.click(function () {
+                if (!settings.timeOnly)
+                    $(days).each(function () {
+                        var date = this;
+                        var dayNum = (this.getDate());
+                        var dayName = dateNum[this.getDay()];
+                        var tempDay = container.find(".dayContainer").last().find(".day").length;
+                        var day = $('<div date="" class="day">' + (dayNum) + '</div>');
+                        if (this.getMonth() != now.getMonth())
+                            day.addClass("notCurrentMonth");
+                        date.setHours(inputSelectedDate.getHours());
+                        date.setMinutes(inputSelectedDate.getMinutes());
+                        var tempDatev2 = new Date(this)
+                        if (tempDatev2.setHours(0, 0, 0, 0) === tempDate.setHours(0, 0, 0, 0))
+                            day.addClass("selectedDate");
+                        day.click(function () {
 
-                        inputSelectedDate = date;
-                        SelectDate(false, date);
-                        if (settings.onDayClick != undefined) {
-                            var option = { selectedDate: inputSelectedDate };
-                            $.extend(option, settings);
-                            settings.onDayClick(option, SelectDate(true, date));
+                            inputSelectedDate = date;
+                            SelectDate(false, date);
+                            if (settings.onDayClick != undefined) {
+                                var option = { selectedDate: inputSelectedDate };
+                                $.extend(option, settings);
+                                settings.onDayClick(option, SelectDate(true, date));
 
-                        }
+                            }
 
-                        if (!settings.closeOnSelect)
-                            BuildDate();
+                            if (!settings.closeOnSelect)
+                                BuildDate();
+                        });
+                        AddDay(day);
+
                     });
-                    AddDay(day);
-
-                });
 
                 container.width((container.find(".dayContainer").last().find(".day").outerWidth(true) * 7) + 5);
                 container.css({ top: offset.top + offset.height, left: offset.left });
@@ -378,7 +379,7 @@
                     //if (input.attr("indicator") != "" && input.attr("indicator") !== undefined && culture.amDesignator != "")
                     //    timeContainer.find(".pmam").html(input.attr("indicator"));
                     //else
-                        timeContainer.find(".pmam").html(inputSelectedDate.getHours() >= 12 ? "PM" : "AM");
+                    timeContainer.find(".pmam").html(inputSelectedDate.getHours() >= 12 ? "PM" : "AM");
 
 
                     timeContainer.find(".minutes, .hour").click(function () {
@@ -413,7 +414,9 @@
 
                         $("body").append(timeControls);
                         var offset = span[0].getBoundingClientRect();
-                        timeControls.css({ left: offset.left, top: (offset.top - timeControls.outerHeight(true)) });
+                        if (!settings.timeOnly)
+                            timeControls.css({ left: offset.left, top: (offset.top - timeControls.outerHeight(true)) });
+                        else timeControls.css({ left: offset.left, top: (offset.top) });
 
                     });
 
@@ -477,9 +480,22 @@
                         BuildDate();
                 });
                 container.append(dayContainer);
+                container.css("min-width", input.outerWidth(true) + 3);
+                if (settings.timeOnly) {
+                    container.find(".dayContainer").first().hide();
+                    container.find(".dayContainer").last().hide();
+                }
 
-                if (slow)
+                var allExeptLastTwo = $.grep(container.find(".dayContainer"), function (d, i) { return i < container.find(".dayContainer").length - 2 && i > 0 });
+                if (slide === "toLeft") {
+                    $(allExeptLastTwo).css("left", "-" + $(allExeptLastTwo).first().width());
+                    $(allExeptLastTwo).animate({ "left": "0px" }, 200);
+                } else if (slide === "toRight") {
+                    $(allExeptLastTwo).css("left", $(allExeptLastTwo).first().width());
+                    $(allExeptLastTwo).animate({ "left": "0px" }, 200);
+                } else if (slide === true)
                     container.hide().slideDown(300);
+
 
             }
 
@@ -524,7 +540,7 @@
             }
 
             if (settings.useMask) {
-                var maskText = (inputFormat + " " + timeFormat.trim()).toLowerCase();
+                var maskText = !settings.timeOnly ? (inputFormat + " " + timeFormat.trim()).toLowerCase() : timeFormat.trim().toLowerCase();
                 var result;
                 var keyisDown = false;
                 input.unbind("keypress.fancyDatePicker");
@@ -552,21 +568,21 @@
                     var value = input.val().toUpperCase();
                     var dateString = "";
                     var stringSplitter = (inputFormat).toLowerCase().split(char);
+                    if (settings.timeOnly) {
+                        value = SelectDate(true, new Date());
+                        if (value.indexOf(" ") != -1)
+                            value = value.substring(0, value.indexOf(" ") + 1);
+                        value += input.val().toUpperCase();
+                    } else if (!settings.useTime) {
+                        value += " hh:mm" + (culture.amDesignator != "" ? " tt" : "");
+                    }
+
                     var lastChars = "";
                     if (value.indexOf("P") != -1)
                         lastChars = value.substring(value.indexOf("P"));
                     else if (value.indexOf("A") != -1)
                         lastChars = value.substring(value.indexOf("A"));
                     value = value.replace(eval("/([" + culture.pmDesignator + "|" + culture.amDesignator + "])/g"), "").trim();
-
-                    //if (timeFormat != "") {
-                    //    stringSplitter = stringSplitter.concat(timeFormat.trim().split(":"))
-                    //    //stringSplitter.push("hh");
-                    //    ////stringSplitter.push(":");
-                    //    //stringSplitter.push("mm");
-                    //    //stringSplitter.push("tt");
-                    //}
-
                     if (timeFormat != "") {
                         timeFormat += " ";
                         var timeSpliter = timeFormat.toLowerCase().trim().split(":");
@@ -577,10 +593,6 @@
                         }
                         timeSpliter.splice(1, 0, ":");
                         stringSplitter = stringSplitter.concat(timeSpliter);
-                        //stringSplitter.push("hh");
-                        ////stringSplitter.push(":");
-                        //stringSplitter.push("mm");
-                        //stringSplitter.push("tt");
                     }
 
                     var valueSplitter = [];
@@ -621,16 +633,23 @@
                     } else if (valueSplitter.length == 5 && stringSplitter[4].length == valueSplitter[4].length && value.match(/:/g) !== null) {
                         start++;
                         value += " ";
-                    } else if (culture.pmDesignator != "" && valueSplitter.length == 6 && stringSplitter[5].length == valueSplitter[5].length && value.match(/:/g) !== null) {
+                    } else if (settings.useTime && culture.pmDesignator != "" && valueSplitter.length == 6 && stringSplitter[5].length == valueSplitter[5].length && value.match(/:/g) !== null) {
                         start++;
                         value += " ";
                     }
-                    if (value.length > maskText.length)
-                        value = value.substring(0, maskText.length);
-                    if (value.indexOf("12:") && culture.amDesignator != "") {
+                    if (!settings.useTime)
+                        value = value.replace(" hh:mm" + (culture.amDesignator != "" ? " tt" : ""), "");
 
-                        value=  value.replace("12:", "11:");
+                    if (value.length > maskText.length) {
+                        if (settings.timeOnly) {
+                            value = value.substring(value.indexOf(" ")).trim();
+                        }
 
+                        if (value.length > maskText.length)
+                            value = value.substring(0, maskText.length);
+                    }
+                    if (value.indexOf("12:") != -1 && culture.amDesignator != "") {
+                        value = value.replace("12:", "11:");
                     }
 
                     result = value;
@@ -648,6 +667,8 @@
                 input.attr("placeholder", maskText.toUpperCase());
 
                 input.change(function () {
+                    //if (settings.timeOnly)
+                    inputSelectedDate = undefined;
                     validateInputDate();
                     SelectDate(false, inputSelectedDate);
                 })
