@@ -1,6 +1,6 @@
-#FancyDatePicker is a small plugin for Time, Date or DateTime picker using only jquary
+# FancyDatePicker is a small plugin for Time, Date or DateTime picker using only jquary
 
-##Demo
+## Demo
 
 https://codepen.io/AlenToma/pen/owXYKj?editors=0100
 
