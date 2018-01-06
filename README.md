@@ -2,13 +2,6 @@
 
 ## Demo
 
-[codepen](https://codepen.io/AlenToma/pen/owXYKj?editors=0100)
-
-![DateTime Preview](https://raw.githubusercontent.com/AlenToma/FancyDatePicker/master/Preview1.PNG)
-
-![DateTime Preview](https://raw.githubusercontent.com/AlenToma/FancyDatePicker/master/previewClock.PNG)
-
-![DateTime Preview](https://raw.githubusercontent.com/AlenToma/FancyDatePicker/master/Clock.PNG)
 ## How to Use
 
 ```js
@@ -32,3 +25,12 @@ $(".sv").fancyDatePicker({
   });
 
 ```
+
+[codepen](https://codepen.io/AlenToma/pen/owXYKj?editors=0100)
+
+![DateTime Preview](https://raw.githubusercontent.com/AlenToma/FancyDatePicker/master/Preview1.PNG)
+
+![DateTime Preview](https://raw.githubusercontent.com/AlenToma/FancyDatePicker/master/previewClock.PNG)
+
+![DateTime Preview](https://raw.githubusercontent.com/AlenToma/FancyDatePicker/master/Clock.PNG)
+
