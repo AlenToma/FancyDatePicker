@@ -2,7 +2,7 @@
 
 ## Demo
 
-https://codepen.io/AlenToma/pen/owXYKj?editors=0100
+[codepen](https://codepen.io/AlenToma/pen/owXYKj?editors=0100)
 
 ![DateTime Preview](https://raw.githubusercontent.com/AlenToma/FancyDatePicker/master/Preview1.PNG)
 
@@ -11,7 +11,7 @@ https://codepen.io/AlenToma/pen/owXYKj?editors=0100
 ![DateTime Preview](https://raw.githubusercontent.com/AlenToma/FancyDatePicker/master/Clock.PNG)
 ## How to Use
 
-```
+```js
 <input type="text" class="sv" />
 
 $(".sv").fancyDatePicker({
